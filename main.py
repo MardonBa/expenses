@@ -70,6 +70,9 @@ while True: ## Event loop
     elif action == 'see current categories': ## Shows the user what categories there currently are
         print(categories)
 
+    elif action == 'edit row':
+        data_changes.edit_row(budget_df, categories)
+
     elif action == 'close':
         data_changes.save_data(budget_df) ## Save the changes
         break ## Breaks out of the while loop, which essentially ends the code

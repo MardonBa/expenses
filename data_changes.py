@@ -102,7 +102,7 @@ def create_new_column(df, col_name, default_value=0):
     ## Takes in a DataFrame, the name of a new column, and optionally a default value for the values of the column
     df[col_name] = [default_value for i in range(len(df))]
 
-def edit_row(df):
+def edit_row(df, categories):
     knows_index = input("Do you know what the index of the row you want to edit is? (Y/n): ")
     knows_index = True if knows_index == "Y" else False ## Changes the user-inputted value to a boolean for ease of use
 
@@ -111,7 +111,7 @@ def edit_row(df):
     else:
         known_values = [] ## Used to store the values the user inputs
         for column in df.columns:
-            value = input(f"What is the value of {column} in the row that you want to edit? (press Enter if you don't know) ")
+            value = input('What is the value of "' + column + '" in the row that you want to edit? (press Enter if you dont know) ')
             known_values.append(value)
 
     counter = 0
@@ -144,4 +144,5 @@ def edit_row(df):
             print(f"Is the following the row that you are looking for? {[df.loc[index]]}. If so, enter {i} when prompted")
         index = input("Please enter the number given that corresponds to the row you wish to edit")
     
-    ## Continue with calling add_new_entry()
+    print("Follow the instructions to edit all the relevant values for this row")
+    add_new_entry(df, categories, False, index) ## Prompts the user for the new information for the row
