@@ -1,0 +1,6 @@
+amount,withdrawal/deposit,reason,category,date,new balance
+500.0,deposit,paycheck,paycheck,2006-11-12,500.0
+250.0,withdrawal,paycheck,paycheck,2007-11-12 00:00:00,250.0
+400.0,withdrawal,paycheck,paycheck,2008-11-12 00:00:00,-150.0
+1000.0,deposit,gift,gift,2903-11-12 00:00:00,850.0
+200.0,withdrawal,funsies!,leisure,1232-11-12 00:00:00,650.0
