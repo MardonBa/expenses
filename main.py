@@ -33,7 +33,11 @@ while True: ## Event loop
         data_changes.save_data(budget_df)
 
     elif action == 'add new entry':
-        budget_df = data_changes.add_new_entry(budget_df, categories)
+        try: 
+            budget_df = data_changes.add_new_entry(budget_df, categories)
+        except Exception as e:
+            print(e)
+            print('Something went wrong. Please try again!')
 
     elif action == 'make a new column':
         column_name = input("What would you like to name the new column? ")
