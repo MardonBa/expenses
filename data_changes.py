@@ -1,3 +1,5 @@
+import time
+
 def save_data(df): ## Saves the updated dataframe to the budget_data.csv file
     ## Runs on user request, or on terminal close
     df.to_csv('./budget_data.csv', index=False)
@@ -114,35 +116,47 @@ def edit_row(df, categories):
             value = input('What is the value of "' + column + '" in the row that you want to edit? (press Enter if you dont know) ')
             known_values.append(value)
 
-    counter = 0
-    for value in known_values:
-        if value == "":
-            counter += 1
-    if counter == len(known_values):
-        print("Sorry, you have to give some information to go off of in order to locate the row you want to edit")
-        return ## Ends the function, since the user doesn't know any values, and doesn't know the index of the row
-    
-    potential_row_indexes = []
-    first_iter = True
-    for i in range(len(df.columns)): ## Iterates over each column in the dataframe
-        for j in range(len(df)): ## Iterates over each row in the dataframe
-            if not first_iter: ## Checks to see if this is the first iteration
-                if known_values[j] == df.at[j, i] and known_values[i] != "": ## If not, check to see if the known value for the given column is the in the cell being checked
-                    if known_values[i] in potential_row_indexes: ## Since this is no longer the first iteration, check to see if the 
-                        pass
-                    else: ## If the known value for a given column is not in the potential row indexes, remove it, since it cannot be the row the user is looking for
-                        potential_row_indexes.remove(j)
-            elif known_values[i] == df.at[j, i] and known_values[i] != "": ## check to see if the known value for the given column is the in the cell being checked
-                potential_row_indexes.append(j) ## If it is, append that row index to the list of potential row indexes
-                first_iter = False ## Changes to False after the first iteration
-                ## first_iter is indented so that it doesn't change until a known value is presented, not an empty string, so that the program can have something to check off of for future iterations
+        counter = 0
+        for value in known_values:
+            if value == "":
+                counter += 1
+        if counter == len(known_values):
+            print("Sorry, you have to give some information to go off of in order to locate the row you want to edit")
+            return ## Ends the function, since the user doesn't know any values, and doesn't know the index of the row
+        
+        potential_row_indexes = []
+        items_to_remove = [] ## Tracks what to remove from potential indexes
+        print(len(df.columns)) ## Test
+        for i in range(len(df.columns)): ## Iterates over each column in the dataframe
+            first_iter = True
+            for j in range(len(df)): ## Iterates over each row in the dataframe
+                print(f"First iter: {first_iter}")
+                if not first_iter: ## Checks to see if this is the first iteration
+                    if known_values[i] == df.iat[j, i] and known_values[i] != "": ## If not, check to see if the known value for the given column is the in the cell being checked
+                        if known_values[i] in potential_row_indexes: ## Since this is no longer the first iteration, check to see if the value being checked is already in the array
+                            pass
+                        else: ## If the known value for a given column is not in the potential row indexes, remove it, since it cannot be the row the user is looking for
+                            print(i)
+                            ##potential_row_indexes.remove(potential_row_indexes[i])
+                            items_to_remove.append(j)
+                elif known_values[i] == df.iat[j, i] and known_values[i] != "": ## check to see if the known value for the given column is the in the cell being checked
+                    potential_row_indexes.append(j) ## If it is, append that row index to the list of potential row indexes
+                    first_iter = False ## Changes to False after the first iteration
+                    ## first_iter is indented so that it doesn't change until a known value is presented, not an empty string, so that the program can have something to check off of for future iterations
+        print(f"Potential row indexes: {potential_row_indexes}") ## Tset
+        for item in items_to_remove:
+            print(item) ## Test
+            potential_row_indexes.remove(item) ## Removes the invalid rows from the list of potential rows
 
-    if len(potential_row_indexes) == 1:
-        index = potential_row_indexes[0]
-    else:
+        print(potential_row_indexes) ## Test
         for i, index in enumerate(potential_row_indexes):
-            print(f"Is the following the row that you are looking for? {[df.loc[index]]}. If so, enter {i} when prompted")
-        index = input("Please enter the number given that corresponds to the row you wish to edit")
+            print(\
+f"Is the following the row that you are looking for? \n\n \
+{[df.loc[index]]} \n\n \
+If so, enter {i} when prompted")
+            
+        time.sleep(5) ## For ease of use purposes
+        index = input("Please enter the number given that corresponds to the row you wish to edit ")
     
     print("Follow the instructions to edit all the relevant values for this row")
     add_new_entry(df, categories, False, index) ## Prompts the user for the new information for the row
