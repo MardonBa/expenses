@@ -1,7 +1,7 @@
 amount,withdrawal/deposit,reason,category,date,new balance
 500.0,deposit,paycheck,paycheck,2006-11-12,500.0
-250.0,withdrawal,paycheck,paycheck,2007-11-12 00:00:00,250.0
-400.0,withdrawal,paycheck,paycheck,2008-11-12 00:00:00,-150.0
-1000.0,deposit,gift,gift,2903-11-12 00:00:00,850.0
-200.0,withdrawal,funsies!,leisure,1232-11-12 00:00:00,650.0
-100.0,deposit,none,paycheck,2005-11-12 00:00:00,750.0
+1000.0,withdrawal,idk,bills,2990-11-23 00:00:00,-500.0
+400.0,withdrawal,paycheck,paycheck,2008-11-12 00:00:00,-400.0
+100.0,deposit,paid!,paycheck,2023-08-21 00:00:00,-800.0
+200.0,withdrawal,funsies!,leisure,1232-11-12 00:00:00,-1200.0
+100.0,deposit,none,paycheck,2005-11-12 00:00:00,-1400.0

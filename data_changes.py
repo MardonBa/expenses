@@ -1,4 +1,5 @@
 import time
+from copy import deepcopy
 
 def save_data(df): ## Saves the updated dataframe to the budget_data.csv file
     ## Runs on user request, or on terminal close
@@ -26,6 +27,27 @@ view deposit graph: will ask you what time period of deposits you want to see (p
 view total balance graph: will ask you what time period of total balance you want to see (pre-set or custom time period) \n\n \
 view spending graph by category: will ask you what time period of spending you want to see (pre-set or custom time period), as well as what category/categories you wish to see. Option to display a line with the budget for that category/categories\n\n \
 close: saves the updates if you haven't already, and ends the program \n")
+          
+def calculate_new_balance(data, df_len, previous_row_balance):
+    ## doesnt work
+    print(data)
+    transaction_type = data[1] ## withdrawal/deposit value is in the second position of the data list (index 1)
+    if transaction_type.lower() == 'withdrawal': ## Uses lowercase in case the user capitalized any letters
+        if df_len == 0:
+            new_balance = -data[0] ## Since this is the first entry, set new balance to the amount removed
+            ## The amount removed is stored in the first entry of the data list
+            ## Negative since it is a removal
+        else:
+            new_balance = previous_row_balance - data[0] ## Subtract the amount of the latest withdrawal (stored in the data list) from the total amount in the previous entry
+    else: ## if the transaction type was a deposit
+        if df_len == 0:
+            new_balance = data[0] ## Since this is the first entry, set new balance to the amount added
+            ## The amount added is stored in the first entry of the data list
+        else:
+            new_balance = previous_row_balance + data[0] ## Add the amount of the latest deposit (stored in the data list) to the total amount in the previous entry
+
+    return new_balance
+
 
 from datetime import datetime
 def add_new_entry(df, categories, add_to_end=True, index_to_add=None):
@@ -33,42 +55,30 @@ def add_new_entry(df, categories, add_to_end=True, index_to_add=None):
     ## First, prompt the user for the information relevant to each column, and store that information in a list, to be added to the DataFrame
     ## This way, custom columns are included
     data = []
+    index_to_add = int(index_to_add)
 
-    print(f"columns: {[df.columns]}")
     for column in df.columns:
-        print(column)
         ## The following code is written before asking for a user-inputed value because it should be calculated seperately from user input
         ## If new balance is the last column, the for loop is essentially broken out of, since continue cannot continue to an iteration that does not exist
         ## Use continue instead of break because the user can add custom columns, which would come after the new balance column
         if column == 'new balance': ## Calculates the new balance
-            print("calculating new balance") ## Test
-            transaction_type = data[1] ## withdrawal/deposit value is in the second position of the data list (index 1)
-            if transaction_type.lower() == 'withdrawal': ## Uses lowercase in case the user capitalized any letters
-                print("withdrawal") ## Test
-                if len(df) == 0:
-                    print("first entry") ## Test
-                    data.append(-data[0]) ## Since this is the first entry, append the amount removed to data
-                    ## The amount removed is stored in the first entry of the data list
-                    ## Negative since it is a removal
-                    continue ## Move on to the next iteration (necessary for if the user has created custom column)
-                else:
-                    print("subtract from last balance") ## Test
-                    new_balance = df.at[len(df) - 1, 'new balance'] - data[0] ## Subtract the amount of the latest withdrawal (stored in the data list) from the total amount in the previous entry
-                    data.append(new_balance)
-                    continue ## Move on to the next iteration (necessary for if the user has created custom column)
-            else: ## if the transaction type was a deposit
-                print("deposit")
-                if len(df) == 0:
-                    print("first entry")
-                    data.append(data[0]) ## Since this is the first entry, append the amount added to data
-                    ## The amount added is stored in the first entry of the data list
-                    continue ## Move on to the next iteration (necessary for if the user has created custom column)
-                else:
-                    print("added to last balance") ## Test
-                    new_balance = df.at[len(df) - 1, 'new balance'] + data[0] ## Add the amount of the latest deposit (stored in the data list) to the total amount in the previous entry
-                    print(f"new balance: {new_balance}")
-                    data.append(new_balance)
-                    continue ## Move on to the next iteration (necessary for if the user has created custom column)
+            if add_to_end:
+                previous_row_balance = df.at[len(df) - 1, 'new balance'] 
+                data.append(calculate_new_balance(data, len(df), previous_row_balance)) ## Adds the calculated balance to the data
+                continue ## Move on to the next iteration (necessary for if the user has created custom column)
+            else:
+                new_balances = [] ## Used to set the DataFrame column to this new list
+                for i in range(len(df)): ## Iterate through the DataFrame
+                    if i < index_to_add: ## No need to change the values that come before the edited row, so just add those values to new_balances
+                        new_balances.append(df.at[i, 'new balance'])
+                    else:
+                        previous_row_balance = df.at[i - 1, 'new balance'] ## Uses i - 1 to find the previous balance of the row before it for making changes
+                        new_balances.append(calculate_new_balance(data, len(df), previous_row_balance))
+                        if i == index_to_add:
+                            data.append(new_balances[-1]) ## Add the last value in the new balances list to the data list so that data maintains the corect length
+                df["new balance"] = new_balances ## Updates dataframe
+                continue ## Move on to next iteration
+
 
         elif column == 'category':
             user_input = input(f"What category would you like to track this input as? {categories}: ")
@@ -103,14 +113,12 @@ def add_new_entry(df, categories, add_to_end=True, index_to_add=None):
         
         data.append(user_input)
     
-    print(f"Final data: {data}") ## Test
-    print(f"length of data: {len(data)}") ## Test
-    print(f"length needed: {len(df.columns)}") ## Test
     if add_to_end: ## Adds the acquired data to the end of the dataframe
-        df.loc[len(df)] = data
+        df.iloc[len(df)] = data
     else: ## Adds the acquired data to a specified index
-        df.loc[index_to_add] = data
-    
+
+        df.iloc[index_to_add] = data
+
     return df
 
 
@@ -128,6 +136,10 @@ def edit_row(df, categories):
         known_values = [] ## Used to store the values the user inputs
         for column in df.columns:
             value = input('What is the value of "' + column + '" in the row that you want to edit? (press Enter if you dont know) ')
+            try:
+                value = float(value) ## Changes the value to a float instead of a string if possible/necessary
+            except:
+                pass ## Do nothing
             known_values.append(value)
 
         counter = 0
@@ -140,46 +152,37 @@ def edit_row(df, categories):
         
         potential_row_indexes = []
         items_to_remove = [] ## Tracks what to remove from potential indexes
-        print(len(df.columns)) ## Test
         for j in range(len(df)): ## Iterates over each column in the dataframe
             first_iter = True
             for i in range(len(df.columns)): ## Iterates over each row in the dataframe
-                print(f"First iter: {first_iter}")
-                print(f"known_values[i]: {known_values[i]}")
-                print(f"df.iat[j, i]: {df.iat[j, i]}")
-                print(f"potential row indexes: {potential_row_indexes}")
                 if not first_iter: ## Checks to see if this is the first iteration
-                    print("not first iter")
                     if known_values[i] == df.iat[j, i] and known_values[i] != "": ## If not, check to see if the known value for the given column is the in the cell being checked
-                        print("check 1")
                         if known_values[i] in potential_row_indexes: ## Since this is no longer the first iteration, check to see if the value being checked is already in the array
                             pass
                         else: ## If the known value for a given column is not in the potential row indexes, remove it, since it cannot be the row the user is looking for
-                            print(i)
                             ##potential_row_indexes.remove(potential_row_indexes[i])
                             items_to_remove.append(j)
                 elif known_values[i] == df.iat[j, i] and known_values[i] != "": ## check to see if the known value for the given column is the in the cell being checked
-                    print("check 2")
                     potential_row_indexes.append(j) ## If it is, append that row index to the list of potential row indexes
                     first_iter = False ## Changes to False after the first iteration
                     ## first_iter is indented so that it doesn't change until a known value is presented, not an empty string, so that the program can have something to check off of for future iterations
-        print(f"Potential row indexes: {potential_row_indexes}") ## Tset
         for item in items_to_remove:
-            print(item) ## Test
             potential_row_indexes.remove(item) ## Removes the invalid rows from the list of potential rows
+        
+        print(f"potential row indexes: {potential_row_indexes}") ## Test
 
-        print(potential_row_indexes) ## Test
-        for i, index in enumerate(potential_row_indexes):
+        for index in potential_row_indexes:
             print(\
 f"Is the following the row that you are looking for? \n\n \
 {[df.loc[index]]} \n\n \
-If so, enter {i} when prompted")
+If so, enter {index} when prompted")
+            time.sleep(3)
             
         index = input("Please enter the number given that corresponds to the row you wish to edit: ")
     
     print("Follow the instructions to edit all the relevant values for this row")
     try:
-        add_new_entry(df, categories, False, index) ## Prompts the user for the new information for the row
+        add_new_entry(df, categories, add_to_end=False, index_to_add=index) ## Prompts the user for the new information for the row
     except Exception as e:
-        print(e)
+        print(f"Error: {e}")
         print('Something went wrong. Please try again!')
