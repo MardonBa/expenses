@@ -29,8 +29,6 @@ view spending graph by category: will ask you what time period of spending you w
 close: saves the updates if you haven't already, and ends the program \n")
           
 def calculate_new_balance(data, df_len, previous_row_balance):
-    ## doesnt work
-    print(data)
     transaction_type = data[1] ## withdrawal/deposit value is in the second position of the data list (index 1)
     if transaction_type.lower() == 'withdrawal': ## Uses lowercase in case the user capitalized any letters
         if df_len == 0:
@@ -39,7 +37,7 @@ def calculate_new_balance(data, df_len, previous_row_balance):
             ## Negative since it is a removal
         else:
             new_balance = previous_row_balance - data[0] ## Subtract the amount of the latest withdrawal (stored in the data list) from the total amount in the previous entry
-    else: ## if the transaction type was a deposit
+    elif transaction_type.lower() == 'deposit': ## if the transaction type was a deposit
         if df_len == 0:
             new_balance = data[0] ## Since this is the first entry, set new balance to the amount added
             ## The amount added is stored in the first entry of the data list
@@ -50,12 +48,13 @@ def calculate_new_balance(data, df_len, previous_row_balance):
 
 
 from datetime import datetime
-def add_new_entry(df, categories, add_to_end=True, index_to_add=None):
+def add_new_entry(df, categories, add_to_end=True, index_to_add=0):
     print("dont forget, dates should be in the format MM/DD/YYYY")
     ## First, prompt the user for the information relevant to each column, and store that information in a list, to be added to the DataFrame
     ## This way, custom columns are included
     data = []
     index_to_add = int(index_to_add)
+    print(f"index to add: {index_to_add}") ## Test
 
     for column in df.columns:
         ## The following code is written before asking for a user-inputed value because it should be calculated seperately from user input
@@ -63,20 +62,31 @@ def add_new_entry(df, categories, add_to_end=True, index_to_add=None):
         ## Use continue instead of break because the user can add custom columns, which would come after the new balance column
         if column == 'new balance': ## Calculates the new balance
             if add_to_end:
-                previous_row_balance = df.at[len(df) - 1, 'new balance'] 
-                data.append(calculate_new_balance(data, len(df), previous_row_balance)) ## Adds the calculated balance to the data
-                continue ## Move on to the next iteration (necessary for if the user has created custom column)
+                if len(df) == 0:
+                    data.append(data[0] if data[1] == 'deposit' else -data[0])  ## Properly sets the value for the new balance column depending on if it is a withdrawal or deposit
+                    continue
+                else:
+                    previous_row_balance = df.at[len(df) - 1, 'new balance'] 
+                    data.append(calculate_new_balance(data, len(df), previous_row_balance)) ## Adds the calculated balance to the data
+                    continue ## Move on to the next iteration (necessary for if the user has created custom column)
             else:
                 new_balances = [] ## Used to set the DataFrame column to this new list
                 for i in range(len(df)): ## Iterate through the DataFrame
                     if i < index_to_add: ## No need to change the values that come before the edited row, so just add those values to new_balances
                         new_balances.append(df.at[i, 'new balance'])
                     else:
-                        previous_row_balance = df.at[i - 1, 'new balance'] ## Uses i - 1 to find the previous balance of the row before it for making changes
-                        new_balances.append(calculate_new_balance(data, len(df), previous_row_balance))
                         if i == index_to_add:
-                            data.append(new_balances[-1]) ## Add the last value in the new balances list to the data list so that data maintains the corect length
+                            data.append(new_balances[-1]) ## Add a dummy value in the new balances list to the data list so that data maintains the correct length
+                            current_data = data
+                        else:
+                            current_data = df.loc[i] ## Sets the current row data
+                        previous_row_balance = new_balances[-1] ## Since the new values of the balances are stored in this list, the last item is the previous row's balance
+                        print(f"previous row balance: {previous_row_balance}") ## Test
+                        new_balances.append(calculate_new_balance(current_data, len(df), previous_row_balance))
+                        print(f"new balances: {new_balances}") ## Test
+
                 df["new balance"] = new_balances ## Updates dataframe
+                data[-1] = new_balances[index_to_add] ## Should change the dummy value in the data list to what the actual value is
                 continue ## Move on to next iteration
 
 
@@ -114,9 +124,8 @@ def add_new_entry(df, categories, add_to_end=True, index_to_add=None):
         data.append(user_input)
     
     if add_to_end: ## Adds the acquired data to the end of the dataframe
-        df.iloc[len(df)] = data
+        df.loc[len(df)] = data
     else: ## Adds the acquired data to a specified index
-
         df.iloc[index_to_add] = data
 
     return df
@@ -169,7 +178,6 @@ def edit_row(df, categories):
         for item in items_to_remove:
             potential_row_indexes.remove(item) ## Removes the invalid rows from the list of potential rows
         
-        print(f"potential row indexes: {potential_row_indexes}") ## Test
 
         for index in potential_row_indexes:
             print(\

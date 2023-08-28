@@ -18,6 +18,8 @@ with open("./misc_data.json", "r") as openfile:
 
 categories = json_object["categories"]
 
+print(budget_df) ## Test
+
 message = "Hi there! What would you like to do today? (Enter help to see a list of commands): "
 
 while True: ## Event loop
