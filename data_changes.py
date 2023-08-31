@@ -1,13 +1,13 @@
 import time
 from copy import deepcopy
 
-def save_data(df): ## Saves the updated dataframe to the budget_data.csv file
+def save_data(df, filename='./budget_data.csv'): ## Saves the updated dataframe to the budget_data.csv file
     ## Runs on user request, or on terminal close
-    df.to_csv('./budget_data.csv', index=False)
+    df.to_csv(filename, index=False)
     print('Changes saved!')
 
 def help():
-    print("\n \
+    return "\n \
 Here is a list of user commands: \n\n \
 help: this command! \n\n \
 save changes: saves all changes made \n\n \
@@ -26,19 +26,19 @@ view spending graph: will ask you what time period of spending you want to see (
 view deposit graph: will ask you what time period of deposits you want to see (pre-set or custom time period) \n\n \
 view total balance graph: will ask you what time period of total balance you want to see (pre-set or custom time period) \n\n \
 view spending graph by category: will ask you what time period of spending you want to see (pre-set or custom time period), as well as what category/categories you wish to see. Option to display a line with the budget for that category/categories\n\n \
-close: saves the updates if you haven't already, and ends the program \n")
+close: saves the updates if you haven't already, and ends the program \n"
           
 def calculate_new_balance(data, df_len, previous_row_balance):
     transaction_type = data[1] ## withdrawal/deposit value is in the second position of the data list (index 1)
     if transaction_type.lower() == 'withdrawal': ## Uses lowercase in case the user capitalized any letters
-        if df_len == 0:
+        if df_len == 1:
             new_balance = -data[0] ## Since this is the first entry, set new balance to the amount removed
             ## The amount removed is stored in the first entry of the data list
             ## Negative since it is a removal
         else:
             new_balance = previous_row_balance - data[0] ## Subtract the amount of the latest withdrawal (stored in the data list) from the total amount in the previous entry
     elif transaction_type.lower() == 'deposit': ## if the transaction type was a deposit
-        if df_len == 0:
+        if df_len == 1:
             new_balance = data[0] ## Since this is the first entry, set new balance to the amount added
             ## The amount added is stored in the first entry of the data list
         else:

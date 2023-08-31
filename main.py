@@ -29,7 +29,7 @@ while True: ## Event loop
     ## series of if-elif statements for every action outlined in the help() function
     ## if there is a typo, the final else statement will run, saying that the user likely made a typo and to enter their command again
     if action  == 'help':
-        data_changes.help() ## Display the help
+        print(data_changes.help()) ## Display the help
     
     elif action == 'save changes':
         data_changes.save_data(budget_df)

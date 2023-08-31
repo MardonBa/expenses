@@ -1,6 +1,2 @@
-amount,withdrawal/deposit,reason,category,date,new balance
-500.0,deposit,initial deposit,paycheck,2023-06-23,500.0
-400.0,withdrawal,taxes,taxes,2006-11-12 00:00:00,100.0
-1000.0,deposit,gift,leisure,2023-08-28 00:00:00,1100.0
-2000.0,withdrawal,hospital bills,bills,2023-06-28,-900.0
-400.0,deposit,gift,leisure,2023-07-04,-500.0
+amount,withdrawal/deposit,description,category,date,new balance
+400.0,withdrawal,car payment,bills,2023-08-30,-400.0
