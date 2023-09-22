@@ -50,28 +50,13 @@ while True: ## Event loop
             data_changes.create_new_column(budget_df, column_name)
 
     elif action == "remove column":
-        print(f"columns: {[budget_df.columns]}")
-        user_input = input("Which column would you like to remove? ")
-        budget_df.drop(user_input, axis=1, inplace=True)
-        print(f"Successfully removed the {user_input} column")
+        budget_df = data_changes.remove_column()
     
     elif action == 'create a new category': ## Gets the name of the new category and adds it to the list of categories
-        user_input = input("What would you like the name of your new category to be? ")
-        categories.append(user_input)
-        print(categories)
-        json_object["categories"] = categories ## Changes only that part of the json object
-        with open("./misc_data.json", "w") as outfile: ## writes to the json file
-            json.dump(json_object, outfile)
-            print('done')
+        data_changes.create_new_category(categories, json_object)
 
     elif action == 'remove category':
-        print(f"categories: {categories}")
-        user_input = input("Which category would you like to remove? ")
-        categories.remove(user_input) ## Removes the category from the categories lsit
-        json_object["categories"] = categories ## Changes only that part of the json object
-        with open("./misc_data.json", "w") as outfile: ## writes to the json file
-            json.dump(json_object, outfile)
-            print('done')
+        data_changes.remove_category(categories, json_object)
 
     elif action == 'see current categories': ## Shows the user what categories there currently are
         print(categories)

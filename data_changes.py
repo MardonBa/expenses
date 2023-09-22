@@ -1,5 +1,5 @@
 import time
-from copy import deepcopy
+import json
 
 def save_data(df, filename='./budget_data.csv'): ## Saves the updated dataframe to the budget_data.csv file
     ## Runs on user request, or on terminal close
@@ -110,7 +110,7 @@ def add_new_entry(df, categories, add_to_end=True, index_to_add=0):
 
         elif column == 'date':
             try:
-                user_input = datetime.strptime(user_input, '%m/%d/%Y')
+                user_input = str(datetime.strptime(user_input, '%m/%d/%Y'))
             except:
                 print("Sorry, it seems like you entered the date in the wrong format. Please start again")
             ## converted to a datetime object to easily add-subtract dates to find the difference in time
@@ -194,3 +194,28 @@ If so, enter {index} when prompted")
     except Exception as e:
         print(f"Error: {e}")
         print('Something went wrong. Please try again!')
+
+def remove_column(df):
+    print(f"columns: {[df.columns]}")
+    user_input = input("Which column would you like to remove? ")
+    df.drop(user_input, axis=1, inplace=True)
+    print(f"Successfully removed the {user_input} column")
+    return df
+
+def create_new_category(categories, json_object):
+    user_input = input("What would you like the name of your new category to be? ")
+    categories.append(user_input)
+    print(categories)
+    json_object["categories"] = categories ## Changes only that part of the json object
+    with open("./misc_data.json", "w") as outfile: ## writes to the json file
+        json.dump(json_object, outfile)
+        print('done')
+
+def remove_category(categories, json_object):
+    print(f"categories: {categories}")
+    user_input = input("Which category would you like to remove? ")
+    categories.remove(user_input) ## Removes the category from the categories lsit
+    json_object["categories"] = categories ## Changes only that part of the json object
+    with open("./misc_data.json", "w") as outfile: ## writes to the json file
+        json.dump(json_object, outfile)
+        print('done')
